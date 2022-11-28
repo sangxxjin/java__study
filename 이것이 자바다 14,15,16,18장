@@ -1,0 +1,1526 @@
+람다식
+14.1 람다식
+- 자바는 함수적 프로그래밍을 위해 자바 8부터 람다식(Lambda Expression)을 지원한다.
+- 람다식은 익명함수(anonymous function)을 생성하기 위한 식으로 객체지향 언어 보다는 함수지향 언어에 가까워 기존 자바 개발과 다르게 생각될 수 있다.
+- 자바에서 람다식을 수용한 이유는 자바 코드가 매우 간결해지고, 컬렉션의 요소를 필터링하거나 매핑해서 원하는 결과를 쉽게 집계할 수 있기 때문이다.
+- 람다식의 형태는 매개 변수를 가진 코드 블록이지만, 런타임시에는 익명 구현 객체를 생성한다.
+- (람다식 -> 매개 변수를 가진 코드 블록 -> 익명 구현객체)
+//Runnable 인터페이스의 익명 구현 객체 생성하는 전형적인 코드
+Runnable runnable = new Runnable() {
+    public void run();
+};
+//Runnable 인터페이스의 익명 구현 객체 생성하는 람다식
+Runnable runnable = () -> {...};
+14.2 람다식의 기본 문법
+- 함수적 스타일의 람다식을 작성하는 방법은 다음과 같다.
+(타입 매개변수, ...) -> {실행문; ...} // 매개 변수의 이름은 개발자가 마음대로 줄 수 있다.
+- 람다식 기본 문법
+//기본
+(int a) -> {System.out.println(a);}
+//매개 변수가 1개 라면 ()와 타입을 생략할 수 있다. 매개 변수 타입은 대입되는 값에 따라 자동으로 인식될 수 있기 때문에 
+  람다식에서는 매개 변수의 타입을 일반적으로 언급하지 않는다.
+a -> {System.out.prinln(a);}
+//실행문이 하나일 때 {}를 생략할 수 있다.
+a -> System.out.println(a)
+//만약 매개 변수가 없다면 빈 괄호를 사용해야 한다.    
+() ->{실행문; ..}
+//리턴하는 실행문은 다음과 같이 작성할 수 있다.
+(x,y) -> {return x+y;}
+//중괄호에 return문만 있을 경우 다음과 같이 작성할 수 있다.
+(x,y) -> x+y
+14.3 타겟 타입과 함수적 인터페이스
+- 람다식의 형태는 매개 변수를 가진 코드 블록이기 때문에 마치 자바의 메소드를 선언하는 것처럼 보이나, 
+  자바는 메소드를 단독으로 선언할 수 없고 항상 클래스의 구성 멤버로 선언하기 때문에 람다식은 단순히 메소드를 선언하는 것이 아니라 
+  이 메소드를 가지고 있는 객체를 생성해 낸다.
+인터페이스 변수 = 람다식; //람다식으로 인터페이스의 익명 구현 객체를 생성
+//(타겟 타입)
+- 람다식은 대입될 인터페이스의 종류에 따라 작성 방법이 달라지기 때문에 람다식이 대입될 인터페이스를 람다식의 타겟 타입(target type)이라고 한다.
+14.3.1 함수적 인터페이스(@FunctionalInterface)
+- 람다식이 하나의 메소드를 정의하므로, 두 개 이상의 추상 메소드가 선언된 인터페이스는 람다식을 이요해서 구현 객체를 생성할 수 없다. 
+  이렇듯 하나의 추상메소드 만이 선언된 인터페이스를 함수적 인터페이스(functional interface)라고 한다.
+- 함수적 인터페이스를 작성할 때 두 개 이상의 추상 메소드가 선언되지 않도록 컴파일러가 체킹하도록 하기 위하여 인터페이스 선언 시 
+  @FunctionalInterface 어노테이션을 붙일 수 있다. 추상 메소드가 두 개 이상이면, 컴파일 오류가 발생된다.
+@FunctionalInterface
+public interface MyFunctionalInterface {
+    public void method();
+    public void otherMethod(); // 컴파일 오류 발생
+}
+13.4.2 매개 변수와 리턴값이 없는 람다식
+- 매개 변수와 리턴값이 없는 추상 메소드를 가진 함수적 인터페이스는 다음과 같이 사용될 수 있다.
+//함수적 인터페이스
+@FunctionalInterface
+public interface MyFunctionalInterface {
+    public void method();
+}
+//위 인터페이스를 타겟 타입으로 갖는 람다식
+MyFunctionalInterface fi = () -> {...}
+//참조 변수로 메소드를 호출하여 람다식의 중괄호를 실행시킴
+fi.method();
+public class MyFunctionalInterfaceEx{
+    public static void main(String[]args){
+        MyFunctionalInterface fi;
+        fi= () -> {
+            String str = "method call1";
+            System.out.println(str);
+        };
+        fi.method();
+        fi = () -> System.out.println("mehod call2");
+        fi.method();
+    }
+}
+13.4.3 매개 변수가 있는 람다식
+- 매개 변수가 있고 리턴값이 없는 추상 메소드를 가진 함수적 인터페이스는 다음과 같이 사용될 수 있다.
+@FunctionalInterface
+public interface MyFunctionalInterface{
+    public void method(int x);
+}
+//람다식
+MyFunctionalInterface fi = x -> {...};
+
+//메소드 호출
+fi.method(5);
+14.3.4 리턴값이 있는 람다식
+- 매개 변수가 있고 리턴값이 있는 추상 메소드를 가진 함수적 인터페이스는 다음과 같이 사용될 수 있다.
+@FunctionalInterface
+public interface MyFunctionalInterface{
+    public int method(int x, int y);
+}
+//람다식
+MyFunctionalInterface fi = (x, y) -> {...; return 값; };
+
+//메소드 호출
+fi.method(2,4);
+
+14.4 클래스 멤버와 로컬 변수 사용
+- 람다식의 실행 블록에는 클래스의 멤버(필드와 메소드) 및 로컬 변수를 사용할 수 있다.
+- 클래스의 멤버는 제약 사항 없이 사용 가능하지만, 로컬 변수는 제약이 따른다.
+14.4.1 클래스의 멤버 사용
+- 람다식 실행 블록에는 클래스의 멤버인 필드와 메소드를 제약 없이 사용할 수 있으나, this 키워드의 사용에는 주의가 필요하다.
+- 일반적으로 익명 객체 내부에서 this는 익명 객체의 참조이지만, 람다식에서 this는 내부적으로 생성되는 익명 객체의 참조가 아니라 람다식을 실행한 객체의 참조이다.
+//함수적 인터페이스
+@FunctionalInterface
+public interface MyFunctionalInterface{
+    public void method();
+}
+//this 사용
+public class UsingThis{
+        public int outter =10;
+        class Inner{
+            int inner =20;
+            void method(){
+                //람다식
+                MyFunctionalInterface fi = () -> {
+                    System.out.println("outter: "+ outter);
+                    System.out.println("outter: "+ UsingThis.this.outter+"\n");
+         			//바깥 객체의 참조 얻기 위해서는 클래스명.this 사용           
+                    System.out.println("inner: "+ inner);
+                    System.out.println("inner: "+ this.inner +"\n");//내부 객체는 this 사용 가능
+                };
+                fi.method;
+            }
+        }
+}
+//실행 클래스
+public class UsingThisEx{
+    public static void main(String[]args){
+        UsingThis usingThis = new UsingThis();
+        UsingThis.Inner inner = new usingTHis.new Inner();
+        inner.method();
+    }
+}
+14.4.2 로컬 변수 사용
+- 람다식은 메소드 내부에서 주로 작성되기 때문에 로컬 익명 구현 객체를 생성시킨다고 봐야 한다. 
+  이 때 람다식에서 바깥 클래스의 필드나 메소드는 제한 없이 사용할 수 있으나, 메소드의 매개 변수 또는 로컬 변수를 사용하면 이 두 변수는 final 특성을 가져야 한다.
+- 따라서 매개 변수 또는 로컬 변수를 람다식에서 읽는 것은 허용되지만, 람다신 내부 또는 외부에서 변경할 수 없다.
+- (9.5.3 익명 객체의 로컬 변수 사용 참고, 람다식 내부 변수는 변경 가능)
+
+14.5 표준 API의 함수적 인터페이스
+- 자바 8부터는 빈번하게 사용되는 함수적 인터페이스(functional interface)는 java.util.function 표준 API로 제공한다.
+- 이 패키지에서 제공하는 함수적 인터페이스의 목적은 메소드 또는 생성자의 매개 타입으로 사용되어 람다식을 대입할 수 있도록 하기 위해서이다.
+- java.util.function 패키지의 함수적 인터페이스는 크게 Consumer, Supplier, Function, Operator, Predicate로 구분 되며, 
+  구분 기준은 인터페이스에 선언된 추상 메소드의 매개값과 리턴값의 유무이다.
+14.5.1 Consumer 함수적 인터페이스
+- Consumer 함수적 인터페이스는 단지 매개값을 소비하며 리턴값이 없는 accept() 메소드를 가진다.
+- 매개 변수의 타입과 수에 따른 Consumer들
+인터페이스명		  추상 메소드		  	              설명
+Consumer		      void accept(T t)		      	    객체를 T를 받아 소비
+BiConsumer<T,U> 	void accept(T t, U u)		        객체 T, U를 받아 소비
+DoubleConsumer  	void accept(double value)	    	double 값을 받아 소비
+intConsumer		    void accept(int value)		      int 값을 받아 소비
+LongConsumer	  	void accept(long value)	       	long 값을 받아 소비
+ObjDoubleConsumer	void accept(T t, double value)	객체 T와 double 값을 받아 소비
+ObjIntConsumer	 	void accept(T t, int value)	  	객체 T와 int 값을 받아 소비
+ObjLongConsumer 	void accept(T t, long value)	  객체 T와 long 값을 받아 소비
+- 예를 들어, 다음과 같이 작성할 수 있다.
+//Consumer<T> 인터페이스를 타겟 타입으로 하는 람다식
+Consumer<String> consumer = t -> {t를 소비하는 실행문;};
+//ObjIntConsumer<T> 인터페이스를 타겟 타입으로 하는 람다식
+ObjIntConsumer consumer = <t,i> -> {t와 i를 소비하는 실행문}
+//Consumer 함수적 인터페이스
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.ObjIntConsumer;
+public class ConsumerEx {
+	public static void main(String[] args) {
+		Consumer<String> consumer = t-> System.out.println(t+"8");
+		consumer.accept("java");
+		BiConsumer<String, String> biConsumer = (t, u) -> System.out.println(t+u);
+		biConsumer.accept("java","8");
+		DoubleConsumer doubleConsumer = d -> System.out.println("java"+d);
+		doubleConsumer.accept(8.0);
+		ObjIntConsumer oiConsumer = (t, u) -> System.out.println(t+u);
+		oiConsumer.accept("java", 8);
+	}
+}
+14.5.2 Supplier 함수적 인터페이스
+- Supplier 함수적 인터페이스는 매개 변수가 없고 리턴값이 있는 getXXX() 메소드를 가진다. 
+  이 메소드들은 실행 후 호출한 곳으로 데이터를 리턴(공급)하는 역할을 한다.
+- 리턴 타입에 따른 Supplier 함수적 인터페이스들
+인터페이스명		추상 메소드		설명
+Supplier			T get()			T 객체를 리턴
+BooleanSupplier		boolean getAsBoolean()	boolean 값을 리턴
+DoubleSupplier		double getAsDouble()	double 값을 리턴
+IntSupplier		int getAsInt()		int 값을 리턴
+LongSupplier		long getAsLong()		long 값을 리턴
+- 예제 : 주사위 수 랜덤 공급
+import java.util.function.IntSupplier;
+public class SupplierEx {
+	public static void main(String[] args) {
+		IntSupplier intSupplier = () -> {
+			int num = (int) (Math.random()* 6) + 1;
+			return num;
+		};	// 람다식
+		int num = intSupplier.getAsInt();
+		System.out.println("눈의 수: " +num);
+	}
+}
+14.5.3 Function 함수적 인터페이스
+- Function 함수적 인터페이스는 매개값과 리턴값이 있는 appyXXX() 메소드를 가지며, 
+  이 메소드들은 매개값을 리턴값으로 매핑(타입 변환)하는 역할을 한다.
+- 매개 변수와 리턴 타입에 따른 Function 함수적 인터페이스들
+인터페이스명			         추상메서드		                      	설명
+Function<T,R>		        	R apply(T t)			                    객체 T를 객체 R로 매핑
+BiFunction<T,U,R>		      R apply(T t, U u)		                	객체 T와 U를 객체 R로 매핑
+DoubleFunction		      	R apply(double val)		                double 를 객체 R로 매핑
+IntFunction		          	R apply(int val)			                int 를 객체 R로 매핑
+IntToDoubleFunction	    	double applyAsdouble(int val)	        int를 double로 매핑
+IntToLongFunction		      long applyAsLong(int val)	          	int를 long로 매핑
+LongToDoubleFunction	  	double applyAsdouble(long val)	      long을 double로 매핑
+LongToIntFunction		      int applyAsInt(long val)	          	long을 int로 매핑
+ToDoubleBiFunction<T,U>		double applyAsDouble(T t, U u)	      객체 T와 U를 double 로 매핑
+ToDoubleFunction	      	double applyAsdouble(T t)	            객체 T를 double로 매핑
+ToIntBiFunction<T,U>	  	int applyAsInt(T t, U u)		          객체 T와 U를 int로 매핑
+ToIntFunction		        	int applyAsInt(T t)		                객체 T를 int로 매핑
+ToLongBiFunction<T,U>	  	long applyAsLong(T t, U u)	          객체 T와 U를 long으로 매핑
+ToLongFunction			      long applyAsLong(T t)		              객체 T를 long으로 매핑
+- 예제 : Student 이름과 점수 출력
+//Student 클래스
+public class Student {
+	private String name;
+	private int engScore;
+	private int korScore;
+	public Student(String name, int engScore, int korScore) {
+		this.name=name;
+		this.engScore=engScore;
+		this.korScore=korScore;
+	}
+	public String getName() {
+		return this.name;
+	}
+	public int getEngScore() {
+		return this.engScore;
+	}
+	public int getKorScore() {
+		return this.korScore;
+	}
+}
+//FunctionEx
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
+public class FunctionEx {
+	private static List <Student> list = Arrays.asList(
+			new Student("홍길동", 90,58),
+			new Student("신용권", 10,30)
+			);
+	public static void printString(Function<Student, String> function) {
+		for(Student student : list) {
+			System.out.print(function.apply(student)+" ");
+		}
+		System.out.println();
+	}
+	public static void printInt(ToIntFunction<Student> function) {
+		for(Student student : list) {
+			System.out.print(function.applyAsInt(student)+ " ");
+		}
+		System.out.println();
+	}
+	public static void main(String[]args) {
+		System.out.println("[학생 이름]");
+		printString(t-> t.getName());
+		System.out.println("[영어 점수]");
+		printInt(t-> t.getEngScore());
+		System.out.println("[국어 점수]");
+		printInt(t-> t.getKorScore());
+	}
+}
+14.5.4 Operator 함수적 인터페이스
+- Operator 함수적 인터페이스는 Function과 동일하게 매개 변수와 리턴값이 있는 applyXXX()메소드를 가지고 있으나, 
+  Function 처럼 매핑하는 것이 아닌 매개값을 이용해 연산을 수행한 후 동일한 타입으로 리턴값을 제공하는 역할을 한다.
+- Operator 함수적 인터페이스들
+인터페이스명		          	추상메서드			                        설명
+BinaryOperator	          	BiFunction<T,U,R>의 하위 인터페이스  	T와 U를 연산한 후 R 리턴
+UnaryOperator		            Function<T,R>의 하위 인터페이스	    	T를 연산한 후 R 리턴
+DoubleBinaryOperator	      double applyAsDouble(double, double)	두 개의 double 연산
+DoubleUnaryOperator       	double applyAsDouble(double)		      한 개의 double 연산
+IntBinaryOperator	          int applyAsInt(int,int)		          	두 개의 int 연산
+IntUnaryOperator 	          int applyAsInt(int)			              한 개의 int 연산
+LongBinaryOperator	        long applyAsLong(long, long)      		두 개의 long 연산
+LongUnaryOperator	          long applyAsLong(long)	          		한 개의 long 연산
+- 예제 : 최소값과 최대값 구하기
+import java.util.function.IntBinaryOperator;
+public class OperatorEx {
+	private static int[] scores = {92, 30,90};
+	public static int maxOrMin(IntBinaryOperator operator) {
+		int result = scores[0];
+		for(int score : scores) {
+			result = operator.applyAsInt(result, score);
+		}
+		return result;
+	}
+	public static void main(String[]args) {
+		//최대값 얻기
+		int max = maxOrMin(
+				(a,b) -> {
+					if(a>=b) return a;
+					else return b;
+				}
+		);
+		System.out.println("최대값: " + max);
+		//최소값 얻기
+		int min = maxOrMin(
+				(a,b) -> {
+					if(a<=b) return a;
+					else return b;
+				}
+		);
+		System.out.println("최소값: " + min);
+	}
+}
+14.5.5 Predicate 함수적 인터페이스
+- Predicate 함수적 인터페이스는 매개 변수와 boolean 리턴값이 있는 testXXX() 메소드를 가지고 있다. 
+  이 메소드들은 매개값을 조사해서 true 또는 false를 리턴하는 역할을 한다.
+- Predicate 함수적 인터페이스들
+인터페이스명		       추상 메소드		             	설명
+Predicate		           boolean test(T t)			    객체 T를 조사
+BiPredicate<T, U>	     boolean test(T t, U u)		  객체 T와 U를 비교 조사
+DoublePredicate		     boolean test(double value)	double 값을 조사
+IntPredicate           boolean test(int value)		int 값을 조사
+LongPredicate	         boolean test(long value)	  long 값을 조사
+- 예제: 남자 여자 학생들의 평균 점수 출력
+//StudentP 클래스
+public class StudentP {
+	private String name;
+	private String sex;
+	private int score;
+	public StudentP(String name, String sex, int score) {
+		this.name=name;
+		this.sex=sex;
+		this.score=score;
+	}
+	public String getName() {
+		return this.name;
+	}
+	public String getSex() {
+		return this.sex;
+	}
+	public int getScore() {
+		return this.score;
+	}
+}
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+public class PredicateEx {
+		private static List<StudentP> list = Arrays.asList(
+				new StudentP("홍길동", "남자", 90),
+				new StudentP("김길동", "남자", 80),
+				new StudentP("김자바", "여자", 97),
+				new StudentP("박자바", "여자", 70)
+				);
+		public static double avg(Predicate<StudentP> predicate) {
+			int count=0, sum=0;
+			for(StudentP student : list) {
+				if(predicate.test(student)) {
+				count++;
+				sum += student.getScore();
+				}
+			}
+			return (double) sum/count;
+		}
+		public static void main(String[] args) {
+			double maleAvg = avg(t-> t.getSex().equals("남자"));
+			System.out.println("남자 평균 점수: "+ maleAvg);
+			double femaleAvg = avg(t-> t.getSex().equals("여자"));
+			System.out.println("여자 평균 점수: "+ femaleAvg);
+	}
+}
+14.5.6 andThen()과 compose() 디폴트 메소드
+- 디폴트 및 정적 메소드는 추상 메소드가 아니기 때문에 함수적 인터페이스에 선언되어도 여전히 함수적 인터페이스의 성질을 잃지 않는다.
+- Consumer, Function, Operator 종류의 함수적 인터페이스는 andThen()과 compose() 디폴트 메소드를 가지고 있다. 
+  둘 다 두 개의 함수적인 인터페이스를 순차적으로 연결하고, 첫 처리 결과를 두번째 매개값으로 제공해서 최종 결과값을 얻는다.
+인터페이스AB = 인터페이스A.andThen(인터페이스B);
+최종결과 = 인터페이스AB.method(); // andThen()은 A처리 ->A결과로 B처리
+인터페이스AB = 인터페이스A.compose(인터페이스B);
+최종결과 = 인터페이스AB.method(); // andThen()은 B처리 ->B결과로 A처리
+- andThen()과 compose() 디폴트 메소드들
+종류	    함수적 인터페이스	      andThen()	    compose()
+Consumer	Consumer		            O	
+          BiConsumer<T, U>	      O	
+          DoubleConsumer	      	O	
+          IntConsumer	          	O	
+          LongConsumer	        	O	
+Function	Function<T, R>	      	O	              O
+          BiFunction<T, U, R>   	O	
+Operator	BinaryOperator        	O	
+          DoubleUnaryOperator	    O             	O
+          IntUnaryOperator	      O	              O
+          LongUnaryOperator     	O             	O
+- Consumer()의 andThen은 처리 결과를 리턴하지 않으므로 호출 순서만 정한다.
+- 예제 :andThen
+import java.util.function.Consumer;
+public class ConsumerAndThenEx {
+	public static void main(String[] args) {
+		Consumer<Member> consumerA = (m) -> {
+			System.out.println("consumerA : "+m.getName());
+		};
+		Consumer<Member> consumerB = (m) -> {
+			System.out.println("consumerB : "+m.getId());
+		};
+		Consumer<Member> consumerAB = consumerA.andThen(consumerB);
+		consumerAB.accept(new Member("홍길동", "hong", null) );
+	}
+}
+//Member 클래스
+public class Member {
+	private String name;
+	private String id;
+	private Address address;
+	public Member(String name, String id, Address address) {
+		this.name=name;
+		this.id=id;
+		this.address=address;
+	}
+	public String getName() {
+		 return name;
+	}
+	public String getId() {
+		return id;
+	}
+	public Address getAddress() {
+		return address;
+	}
+}
+//Address클래스
+public class Address {
+	private String country;
+	private String city;
+	public Address(String country, String city) {
+		this.country=country;
+		this.city=city;
+	}
+	public String getCountry() {
+		return country;
+	}
+	public String getCity() {
+		return city;
+	}
+}
+- Function과 Operator는 매개값을 통한 첫 처리결과를 다음 인터페이스의 매개 값으로 넘겨주고, 최종 처리결과를 리턴한다.
+import java.util.function.Function;
+public class FuntionAndThenComposeEx {
+	public static void main(String[]args) {
+		Function<Member, Address> functionA;
+		Function<Address, String> functionB;
+		Function<Member, String> functionAB;
+		String city;
+		functionA = (m)->m.getAddress();
+		functionB = (a)->a.getCity();
+		functionAB = functionA.andThen(functionB);
+		city = functionAB.apply(
+			new Member("홍홍", "hong", new Address("한국", "서울"))
+		);
+		System.out.println("거주 도시 : "+city);
+		functionAB = functionB.compose(functionA);
+		city = functionAB.apply(
+				new Member("공공", "gong", new Address("미국", "뉴욕"))
+				);
+		System.out.println("거주 도시: " +city);
+	}
+}
+14.5.7 and(), or(), negate() 디폴트 메소드와 isEqual() 정적 메소드
+- Predicate 종류의 함수적 인터페이스는 and(), or(), negate() 디폴트 메소드를 가지고 있으며, 이들은 각각 &&,||,!와 대응된다고 볼 수 있다.
+- 예제 : 2의 배수와 3의 배수 조사하기
+import java.util.function.IntPredicate;
+public class PredicteAndOrNegateEx {
+	public static void main(String[] args) {
+		// 2배수 검사
+		IntPredicate predicateA = a-> a%2 ==0;
+		// 3배수 검사
+		IntPredicate predicateB = b-> b%3 ==0;
+		IntPredicate predicateAB;
+		boolean result;
+		//and()
+		predicateAB = predicateA.and(predicateB);
+		result = predicateAB.test(9);
+		System.out.println("9는 2와 3의 배수입니까?" +result);
+		//or()
+		predicateAB = predicateA.or(predicateB);
+		result = predicateAB.test(9);
+		System.out.println("9는 2 또는 3의 배수입니까?" +result);
+		//negate()
+		predicateAB = predicateA.negate();// 원래 결과 true이면 false로
+		result = predicateAB.test(9);
+		System.out.println("9는 홀수입니까?" +result);
+	}
+}
+- Predicate함수적 인터페이스는 isEqual() 정적 메소드를 추가로 제공한다.
+Predicate<Object> predicate = Predicate.isEqual(targetObeject);
+boolean result = predicate.test(sourceObject);//Objects.equals(sourceObject, targetObject) 실행
+sourceObject	targetObject	리턴값
+null		null		true
+not null		null		false
+null		not null		false
+not null		not null		Objects.equals(sourceObject, targetObject)의 리턴값
+//예제
+import java.util.function.Predicate;
+public class PredicateIsEqualEx {
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Predicate<String> predicate;
+		predicate = Predicate.isEqual("java8");
+		System.out.println("java8, null : " +predicate.test(null));
+		predicate = Predicate.isEqual(null);
+		System.out.println("null, null : " +predicate.test(null));
+	}
+}
+14.5.8 minBy(), maxBy() 정적 메소드
+- BinaryOperator 함수적 인터페이스는 minBy()와 maxBy() 정적 메소드를 제공한다. 
+  이 두 메소드는 매개값으로 제공되는 Comparator를 이용해서 최대 T와 최소 T를 얻는 BinaryOperator를 리턴한다.
+리턴 타입	정적 메소드
+BinaryOperator	minBy(Comparator<? super T> comparator)
+BinaryOperator	maxBy(Comparator<? super T> comparator)
+@FunctionalInterface
+public interface Comparator<T>{
+    public int compare(T o1, T o2);
+}
+(o1, o2) -> {...; return int값;} //람다식
+- 예제: 과일 가격 비교
+import java.util.function.BinaryOperator;
+public class OperatorMinByMaxByEx {
+	public static void main(String[] args) {
+		BinaryOperator<Fruit> binaryOperator;
+		Fruit fruit;
+		BinaryOperator= BinaryOperator.minBy((f1,f2)-> Integer.compare(f1.price,f2.price)); 
+		fruit= binaryOperator.apply(new Fruit("딸기", 1000), new Fruit("사과",2000));
+		System.out.println(fruit.name);
+    }
+}
+14.6 메소드 참조
+- 메소드 참조(Method Reference)는 메소드를 참조해서 매개 변수의 정보 및 리턴 타입을 알아내어, 람다식에서 불필요한 매개 변수를 제거하는 것이 목적이다.
+- 메소드 참조도 람다식과 마찬가지로 인터페이스의 익명 구현 객체로 생성되므로 타겟 타입인 인터페이스의 추상 메소드가 어던 매개 변수를 가지고, 
+ 리턴 타입이 무엇인가에 따라 달라진다.
+14.6.1 정적 메소드와 인스턴스 메소드 참조
+- 정적(static) 메소드를 참조할 경우에는 클래스 이름 뒤에 ::기호를 붙이고 정적 메소드 이름을 기술하면 된다.
+클래스 :: 메소드
+- 인스턴스 메소드일 경우에는 먼저 객체를 생성한 다음 참조 변수 뒤에 ::기호를 붙이고 인스턴스 메소드를 기술하면 된다.
+참조변수 :: 메소드
+- 예제 : 정적 및 인스턴스 메소드 참조
+public class MehodReferencesEx {
+	public static void main(String[] args) {
+		IntBinaryOperator operator;
+		//정적 메소드 참조
+		operator = Calculator :: staticMethod;
+		System.out.println("결과 : " + operator.applyAsInt(1, 2));
+		Calculator obj = new Calculator();
+		operator = obj :: instanceMethod;
+		System.out.println("결과 : " +operator.applyAsInt(2, 4));
+	}
+}
+14.6.2 매개 변수의 메소드 참조
+- 메소드는 람다식 외부의 클래스 멤버일 수도 있고, 람다식에서 제공되는 매개 변수의 멤버일 수도 있다. 
+  다음과 같이 람다식에서 제공되는 a 매개 변수의 메소드를 호출해서 b 매개 변수를 매개값으로 사용하는 경우도 있다.
+(a,b) -> {a.instanceMethod(b);}
+//클래스 :: instanceMethod
+- 예제
+import java.util.function.ToIntBiFunction;
+public class ArgumentMethodReferencesEx {
+	public static void main(String[] args) {
+		ToIntBiFunction<String,String> function;
+		function = (a,b) -> a.compareToIgnoreCase(b);
+		print(function.applyAsInt("java8", "JAVA8"));
+		function = String :: compareToIgnoreCase;
+		print(function.applyAsInt("java8", "JAVA8"));
+	}
+	public static void print(int order) {
+		if(order<0) {
+			System.out.println("사전순으로 먼저 옵니다.");
+		} else if(order ==0) {
+			System.out.println("동일한 문자열입니다.");
+		} else {
+			System.out.println("사전순으로 나중에 옵니다.");
+		}
+	}
+}
+14.6.3 생성자 참조
+- 메소드 참조는 생성자 참조도 포함한다. 생성자를 참조한다는 것은 객체 생성을 의미한다.
+- 단순히 객체를 생성하고 리턴하도록 구성된 람다식은 생성자 참조로 대치할 수 있다.
+(a,b) -> {return new 클래스(a,b);}
+//클래스 :: new 로 대치 가능
+- 생성자가 오버로딩되어 여러 개 있을 경우, 컴파일러는 함수적 인터페이스의 추상 메소드와 동일한 매개 변수 타입과 개수를 가지고 있는 생성자를 찾아 실행한다. 
+  만약 해당 생성자가 존재하지 않으면 컴파일 오류가 발생한다.
+- 예제
+import java.util.function.BiFunction;
+import java.util.function.Function;
+public class ConstructorReferenceEx {
+	public static void main(String[] args) {
+		Function<String, MemberC> function1 = MemberC :: new;
+		MemberC member1 = function1.apply("angel");
+		BiFunction<String,String, MemberC> function2 = MemberC :: new;
+		MemberC member2 = function2.apply("강강", "angel");
+	}
+}
+
+
+
+컬렉션 프레임워크
+컬렉션(Collection) 프레임워크란?
+- 다수의 객체를 저장하고 효율적으로 추가, 삭제, 검색할 수 있도록 구현된 인터페이스와 클래스들을 말한다.
+- 주요 인터페이스로 List, Set, Map이 있다.
+- 배열도 다수의 객체를 저장할 수 있다. 하지만, 저장할 수 있는 크기가 고정적이며, 중간 인덱스의 자료를 삭제했을 때 빈 곳이 생기기도 한다. 
+  이로 인해 고정적 크기의 연속된 객체를 저장하는 것은 좋지만, 유동적인 크기를 갖는 객체 저장에는 적합하지 않을 수 있다.
+- 컬렉션이란? 사전적 의미로 요소를 수집해서 저장하는 것을 말한다.
+List
+특징
+- 순서를 유지하고 저장한다.
+- 중복 저장이 가능하다.
+구현 클래스
+- ArrayList
+- Vector (Thread safe)
+- LinkedList
+Set
+특징
+- 순서를 유지하지 않고 저장한다.
+- 중복 저장이 불가능하다.
+구현 클래스
+- HashSet
+- TreeSet (Binary Tree)
+Map
+특징
+- 키와 값의 쌍으로 저장됨
+- 키는 중복 저장 안됨
+구현 클래스
+- HashMap
+- HashTable (Thread safe)
+- TreeMap (Binary Tree)
+- Properties (Child of HashTable)
+List 컬렉션
+- 객체를 인덱스로 관리한다.
+- 인덱스는 자동 부여된다.
+- 인덱스로 객체를 검색, 삭제하는 기능을 제공한다.
+- 객체 자체를 저장하는 것이 아니라 각 인덱스에 객체의 주소를 저장한다.
+- ArrayList, Vector, LinkedList등이 있다.
+추상 메소드
+객체 추가
+- boolean add(E e): 주어진 객체를 맨 끝에 추가한다.
+- void add(int index E element): 주어진 인덱스에 객체를 추가한다.
+- E set(int index, E element): 주어진 인덱스에 있는 저장된 객체를 주어진 객체로 바꾼다.
+객체 검색
+- boolean contains(Object o): 주어진 객체가 저장되어 있는지 여부를 확인한다.
+- E get(int index): 주어진 인덱스에 저장된 객체를 리턴한다.
+- boolean isEmpty(): 컬렉션이 비어있는지 조사한다.
+- int size(): 저장되어 있는 전체 객체의 수를 반환한다.
+객체 삭제
+- void clear(): 저장된 모든 객체를 삭제한다.
+- E remove(int index): 주어진 인덱스에 저장되어 있는 객체를 삭제한다.
+- boolean remove(Object o): 주어진 객체를 삭제한다.
+ArrayList 구현체
+- new ArrayList<T>()처럼 생성자로 생성이 가능하다.
+- 초기 용량은 10이다.
+- 자바 5 이후부터 제네릭 타입을 사용했다.
+- 용량이 늘어나는 유연한 배열로 생각하면 된다.
+- 인덱스 0부터 차례로 객체가 저장된다.
+- 리스트 중간에 데이터를 추가, 삭제하는 경우, 해당 인덱스를 기준으로 데이터가 밀려나거나 당겨지는 현상이 일어난다. 
+  중간 데이터가 삭제되거나 추가되는 일이 많은 경우, LinkedList를 사용하면 성능상의 이득을 볼 수 있다.
+그러나 인덱스 검색이 일어날 시, 혹은 맨 마지막에만 데이터가 추가되는 경우에는 ArrayList가 유리하다.
+
+Array.asList(T... a)
+- Array.asList(T... a) 메소드는 배열을 리스트로 만들 때 용이하다. 해당 메소드의 인자 값에 배열을 주면 해당 데이터를 가지는 ArrayList가 반환된다.
+
+public class AsListTest {
+    public static void main(String[] args) {
+        List<Integer> integerList = Arrays.asList(new Integer[]{1, 2, 3, 4}); // 혹은 Arrays.asList(1, 2, 3, 4);
+        for (Integer integer : integerList) {
+            System.out.println("integer = " + integer);
+        }
+    }
+}
+@SafeVarargs
+/varags/
+public static <T> List<T> asList( @NotNull T . . . a) {
+ 	return new ArrayList<>(a) ; 
+}
+내부 구현을 보면, new ArrayList<>(a)의 결과를 반환하는 것을 볼 수 있다.
+
+Vector 구현체
+- 기본적으로 ArrayList와 동일한 내부 구조를 갖는다.
+- 유일한 차이점은 스레드 환경에서 안전하게 객체를 추가, 삭제할 수 있다는 것이다.
+- 이러한 특성을 Thread Safe 하다고 한다.
+- 동기화된(synchronized) 메소드로 구성되어 있기 때문에 가능하다.
+LinkedList 구현체
+- ArrayList와 다르게 내부 배열에 객체를 저장해서 인덱스로 관리하는 것이 아니라, 인접 참조를 링크해서 체인처럼 관리한다.
+- 중간 인덱스의 데이터를 제거하거나 추가할 때, 앞 뒤 링크만 변경되고 나머지 링크는 변경되지 않는다.
+- 이러한 이유 때문에 중간 인덱스에서 잦은 추가, 삭제가 일어날 때는 LinkedList 구현체가 유리하다.
+성능 테스트 결과
+public class LinkedListPerformanceTest {
+    public static void main(String[] args) {
+        List<String> arrayList = new ArrayList<>();
+        List<String> linkedList = new LinkedList<>();
+        long startTime;
+        long endTime;
+        long result;
+        startTime = System.nanoTime();
+        for (int i = 0; i < 100000; i++) {
+            arrayList.add(0, "테스트 문자열");
+        }
+        endTime = System.nanoTime();
+        result = endTime - startTime;
+        System.out.println("result = " + result); // 소요시간: 355540900 나노초
+        startTime = System.nanoTime();
+        for (int i = 0; i < 100000; i++) {
+            linkedList.add(0, "테스트 문자열");
+        }
+        endTime = System.nanoTime();
+        result = endTime - startTime;
+        System.out.println("result = " + result); // 소요시간: 5242300 나노초
+    }
+}
+10만번 루프 기준으로 약 67배의 성능 차이가 나는 것을 확인했다.
+
+Set 컬렉션
+- 중복 데이터가 저장되지 않는다.
+- 순서를 보장하지 않는다.
+- HashSet, LinkedSet, TreeSet 등이 있다.
+- 인덱스를 관리하지 않기 때문에, 인덱스를 매개값으로 갖는 메소드가 없다.
+추상 메소드
+객체 추가
+- boolean add(E e): 주어진 객체를 저장한다. 성공 true 실패 false
+객체 검색
+- boolean contains(Object o): 주어진 객체가 저장되어있는지 확인한다.
+- boolean isEmpty(): 컬렉션이 비어있는지 조사한다.
+- Iterator<E> iterator(): 저장된 객체를 한번씩 가져오는 반복자(Iterator 객체)를 반환한다.
+- int size(): 저장되어 있는 전체 객체 수를 리턴한다.
+- Set 컬렉션에는 인덱스로 객체를 검색하여 가져오는 메소드가 없다. 대신 Iterator객체를 반환하는 메소드가 있고, 
+  Iterator 객체에서는 hasNext(), next(), remove()를 제공한다.
+- 단순 반복을 하고 싶다면 Iterator를 쓰지 않고 향상된 for문을 이용한 조회도 가능하다.
+for(E element : set) { ... }
+
+객체 삭제
+- void clear(): 저장된 모든 객체를 삭제한다.
+- boolean remove(Object o): 주어진 객체를 삭제한다.
+HashSet
+- HashSet은 동일 객체를 판단할 때, hashCode() 메소드를 통해 해시 코드를 얻어낸 뒤에 이미 저장된 객체들의 해시코드와 비교하고, 
+  동일한 해시코드가 있다면, equals() 메소드로 두 객체를 비교해서 true가 나오면 마침내 동일한 객체로 판단한다.
+
+예제 코드
+- Person 객체
+public class Person {
+    private String name;
+    public int age;
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    public String getName() {
+        return name;
+    }
+    public int getAge() {
+        return age;
+    }
+    @Override
+    public boolean equals(Object o) {
+        System.out.println("equals method called");
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return age == person.age && Objects.equals(name, person.name);
+    }
+    @Override
+    public int hashCode() {
+        System.out.println("hashCode method called");
+        return Objects.hash(name, age);
+    }
+}
+- main 함수
+public class HashSetTest {
+    public static void main(String[] args) {
+        Person person1 = new Person("제이크", 30);
+        Person person2 = new Person("제이크", 30);
+        System.out.println("person1 = " + System.identityHashCode(person1));
+        System.out.println("person2 = " + System.identityHashCode(person2));
+        System.out.println(person1 == person2);
+        Set<Person> personSet = new HashSet<>();
+        personSet.add(person1);
+        personSet.add(person2);
+        int size = personSet.size();
+        System.out.println("size = " + size);
+    }
+}
+결과
+person1 = 668386784
+person2 = 495053715
+false
+hashCode method called
+hashCode method called
+equals method called
+Size = 1
+
+ 	- 비록 두 개의 객체가 다른 identityHashCode를 갖고 있지만, .hashCode() 메소드의 결과가 같고 .equals() 메소드의 결과가 true라서 
+    둘은 HashSet 내부에서 같은 값이라고 인식된다.
+
+Map 컬렉션
+- Map 컬렉션은 키(key)와 값(value)로 구성된 Entry 객체를 저장하는 구조를 가지고 있다.
+- 키, 값은 모두 객체이다.
+- 키는 중복이 안되며, 값은 중복이 된다.
+- HashMap, HashTable, LinkedHashMap, Properties, TreeMap 등이 있다.
+추상 메소드
+객체 추가
+- V put(K key, V value): 주어진 키로 값을 저장한다. 새로운 키일 경우 null을 리턴하고, 이전에 있던 키에 새로운 값을 덮어 씌우는 경우 이전에 있던 값을 리턴한다.
+객체 검색
+- boolean containsKey(Object key): 주어진 키가 있는지 여부를 파악한다.
+- boolean containsValue(Object value): 주어진 값이 있는지 여부를 파악한다.
+- Set<Map.Entry<K, V>> entrySet(): 키와 값의 쌍으로 구성된 모든 Map.Entry 객체를 Set에 담아서 반환한다.
+- V get(Object key): 주어진 키가 있는 값을 리턴한다.
+- boolean isEmpty(): 컬렉션이 비어있는지 여부를 확인한다.
+- Set<K> keySet(): 모든 키를 Set 객체에 담아서 리턴한다.
+- int size(): 저장된 키의 총 수를 리턴한다.
+- Collection<V> values(): 저장된 모든 값을 Collection에 담아서 리턴한다.
+객체 삭제
+- void clear(): 모든 Map.Entry 객체를 삭제한다.
+- V remove(Object key): 주어진 키와 일치하는 Map.Entry를 삭제하고 값을 반환한다.
+반복 방법
+- ketSet() 메소드로 모든 키의 Set을 얻고 .get() 메소드로 모든 키를 조회해보면 된다.
+- .entrySet() 메소드로 모든 Map.Entry의 Set을 얻고 .iterator() 메소드를 통해서 반복자(Iterator)를 얻은 후 돌려보면 된다.
+HashMap
+- 키 타입의 객체가 있다면, hashCode()와 equals() 메소드를 둘 다 확인 후에 같은 객체라고 판단한다.
+- 키와 값은 primitive type이 올 수 없다.
+- 아마 .hashCode(), .equals()등의 메소드가 없기 때문?
+HashTable
+- HashMap과 동일한 내부구조를 갖고 있다.
+- 동기화된 (synchronized) 메소드를 갖고 있어서, 멀티 스레드 환경에서 안전하게 객체를 추가, 삭제 가능하다. (thread safe)
+Properties
+- HashTable의 하위 클래스이다.
+- 키와 값을 String이라는 타입으로만 제한한 클래스이다.
+- 보통 애플리케이션의 옵션 정보, 데이터베이스 연결 정보, 다국어 정보 등이 저장된 프로퍼티 파일(.properties)을 읽을 때 주로 사용한다.
+- 프로퍼티 파일(.properties)은 키와 값이 =기호로 연결된 텍스트 파일로 ISO-8859-1 문자셋으로 저장된다. 
+  이 문자셋으로 저장할 수 없는 한글은 유니코드로 변환되어 저장된다.
+- 프로퍼티 파일을 읽기 위해서는 Properties 객체를 생성 후에 .load() 메소드를 이용하면 된다.
+  .load() 메소드는 프로퍼티 파일로부터 데이터를 읽기 위해 FileReader 객체를 매개값으로 받는다.
+예제 코드
+public class PropertiesTest {
+    public static void main(String[] args) throws IOException {
+        String encodedPath = PropertiesTest.class.getResource("../../config/my_properties.properties").getPath();
+        System.out.println("encodedPath = " + encodedPath);
+        String decodedPath = URLDecoder.decode(encodedPath, "utf-8");
+        System.out.println("decodedPath = " + decodedPath);
+        Properties properties = new Properties();
+        properties.load(new FileReader(decodedPath));
+
+        for (Map.Entry<Object, Object> propertyEntry : properties.entrySet()) {
+            String key = (String) propertyEntry.getKey();
+            String value = (String) propertyEntry.getValue();
+            System.out.println("key = " + key + ", value = " + value);
+        }
+    }
+}
+- my_properties.properties 파일은 최상위 디렉토리의 config 디렉토리에 위치해 있다고 가정했다. 
+  현재 클래스의 위치로부터 두 경로 상위로 가야하기 때문에 ../을 두번 적어서 경로를 맞춰주었다.
+- getPath()해서 나온 값은 한글 디코드가 안 되어있기 때문에, URLDecoder 클래스 내부에 있는 정적 메소드를 이용하여 디코드해주었다.
+- 이후 Properties 객체를 생성하고, .load() 메소드를 통해 my_properties.properties 파일을 불러왔다.
+- 기본적으로 Properties도 HashTable의 하위 클래스이기 때문에, Map 인터페이스에서 쓰던 추상 메소드들을 그대로 이용할 수 있다.
+- 사실 키에 대한 값을 얻을 때는 .getProperties()가 가장 흔히 쓰이는 메소드이다.
+- Map.Entry 객체를 가져와 키와 값을 출력했다.
+검색기능을 강화시킨 컬렉션
+- TreeSet
+- TreeMap
+위 두 컬렉션은 이진트리(binary tree)를 이용해서 계층적 구조를 가지도록 객체를 저장한다.
+
+이진 트리 구조란?
+- 부모 자식 관계를 갖고 위에서 아래로 뻗어나가는 트리 구조인데, 특수한 특성을 띈 트리 구조이다. 
+  트리 구조란 것은 그냥 상위 노드에 하위 노드가 붙어있는 형태이고, 상위에서 하위 데이터 접근이 가능하다. 보통 시작점인 루트 노드에 여러 자식노드가 붙으면서 시작된다.
+- 루트노드로부터 시작되어 하위에 연결된 다른 노드들이 있는 구조이다. 트리 노드 구조에서 이진 트리는 아래와 같은 조건을 만족하는 트리 구조를 말한다.
+
+이진트리의 조건
+- 한 부모 노드의 자식 노드는 최대 2개까지만 붙는다.
+- 부모 노드의 값보다 작은 자식은 왼쪽에 붙는다.
+- 부모 노드의 값보다 큰 자식은 오른쪽에 붙는다.
+이진 트리의 조건을 만족하면 다음과 같은 특성을 갖게 된다
+- 이진트리의 조건을 충족하면, 큰 값을 찾거나 작은 값을 찾기 매우 쉽다.
+- 핵심은 데이터의 삽입, 삭제 등의 과정을 거쳤을 때도 규칙을 깨지 않고, 위와 같은 규칙을 지킴으로써 내가 원하는 데이터를 빠르게 검색하려는 데에 있다.
+이진트리의 약점
+- 단, 밸런스가 맞지 않을 수 있다..
+이진트리 약점 극복
+- 이를 위해 TreeMap과 TreeSet은 이진트리에서 더 업그레이드된 레드-블랙 트리를 사용한다.
+TreeSet
+- 이진트리를 기반으로 한 Set 컬렉션이다.
+- 객체 저장 시 자동으로 부모 값보다 낮은 값은 왼쪽 자식 노드에 높은 값은 오른쪽 자식 노드에 정렬된다.
+- TreeSet은 Set 인터페이스가 제공하는 메소드와 별개로 자신만의 메소드를 가지고 있으므로, TreeSet 타입으로 선언해야 할 때가 있다.
+- first(): 제일 낮은 객체를 리턴
+- last(): 제일 높은 객체를 리턴
+- pollFirst() or pollLast(): 제일 높거나 낮은 객체를 꺼내오고 컬렉션에서 제거
+- floor(E e) or ceiling(E e): 동등한 객체가 없다면 높은 혹은 동등한 객체가 없다면 낮은 객체를 가져옴 동등한 게 있으면 동등한 걸 가져옴
+NevigableSet
+- TreeSet의 데이터를 반환받을 때, TreeSet.descendingSet() 등의 메소드를 이용하면 NevigableSet을 반환받을 수 있다.
+- 정렬등에 유연하게 구성할 수 있는 Set이다.
+- NevigableSet에서 .descendingSet()을 한번 더 호출하면 오름차순으로 구성된다.
+TreeMap
+- 이진트리를 기반으로 한 Map 컬렉션이다.
+- 키(key)와 값(value) 중에 키(key)를 기준으로 정렬한다.
+- TreeSet처럼 .descendingKeySet() 이나 .descendingMap()을 통해 NavigableKeySet이나 NavigableMap을 얻을 수 있다.
+Comparable과 Comparator
+- TreeSet과 TreeMap은 정렬을 위해 java.lang.Comparable을 구현한 객체를 요구한다.
+- 사용자 정의 클래스도 Comparable을 구현하면 자동 정렬이 된다.
+Comparable을 상속하면, int compareTo(T o) 메소드를 구현해주면 된다.
+- 주어진 객체보다 크면 1(양수)을 리턴
+- 주어진 객체와 같으면 0을 리턴
+- 주어진 객체보다 작으면 -1(음수)을 리턴
+위의 규칙을 따르는 compareTo()를 작성하면 오름차순 정렬이 자동으로 된다.
+
+테스트 작성해보기
+public class Score {
+    int math;
+    int korean;
+    int english;
+    public Score(int math, int korean, int english) {
+        this.math = math;
+        this.korean = korean;
+        this.english = english;
+    }
+    public int getSum() {
+        return this.math + this.korean + this.english;
+    }
+}
+public class TreeMapTest {
+    public static void main(String[] args) {
+        TreeMap<Score, String> treeMap = new TreeMap<>();
+        treeMap.put(new Score(10, 20, 30), "김똘삼등");
+        treeMap.put(new Score(10, 25, 30), "김똘이등");
+        treeMap.put(new Score(10, 30, 35), "김똘일등");
+        Map.Entry<Score, String> firstEntry = treeMap.firstEntry();
+        System.out.println("꼴찌는? = " + firstEntry.getKey().getSum() + "점, " + firstEntry.getValue());
+        Map.Entry<Score, String> lastEntry = treeMap.lastEntry();
+        System.out.println("일등은? = " + lastEntry.getKey().getSum() + "점, " + lastEntry.getValue());
+    }
+}
+위와 같이 코드를 작성하고 결과를 확인하면... 아래와 같은 결과가 나온다.
+Exception in thread “main” java.lang.ClassCastException
+ 	at java.base/java.util.TreeMap.compare(TreeMap.java:1563)
+ 	at java.base/java.util.TreeMap.addEntryToEmptyMap(TreeMap.java:768)
+ 	at java.base/java.util.TreeMap.put(TreeMap.java:777)
+ 	at java.base/java.util.TreeMap.put(TreeMap.java:534)
+ 	at com.company.treemap.TreeMapTest.main(TreeMapTest.java:9)
+
+class com.company.treemap.Score cannot be cast to class java.lang.Comparable
+- Comparable을 구현해서 나오지 않는 에러이다.
+public class Score implements Comparable<Score>{
+    int math;
+    int korean;
+    int english;
+    public Score(int math, int korean, int english) {
+        this.math = math;
+        this.korean = korean;
+        this.english = english;
+    }
+    public int getSum() {
+        return this.math + this.korean + this.english;
+    }
+    @Override
+    public int compareTo(Score o) {
+        if(this.getSum() > o.getSum()) {
+            return 1;
+        } else if(this.getSum() == o.getSum()) {
+            return 0;
+        }
+        return -1; // the same as return Integer.compare(this.getSum(), o.getSum());
+    }
+}
+public class TreeMapTest {
+    public static void main(String[] args) {
+        TreeMap<Score, String> treeMap = new TreeMap<>();
+        treeMap.put(new Score(10, 20, 30), "김똘삼등");
+        treeMap.put(new Score(10, 25, 30), "김똘이등");
+        treeMap.put(new Score(10, 30, 35), "김똘일등");
+        Map.Entry<Score, String> firstEntry = treeMap.firstEntry();
+        System.out.println("꼴찌는? = " + firstEntry.getKey().getSum() + "점, " + firstEntry.getValue());
+        Map.Entry<Score, String> lastEntry = treeMap.lastEntry();
+        System.out.println("일등은? = " + lastEntry.getKey().getSum() + "점, " + lastEntry.getValue());
+    }
+}
+위와 같이 Comparable<Score> 인터페이스를 구현하면 정상적으로 작동한다.
+꼴찌는 ? = 60점, 김똘삼등
+일등은 ? = 75점, 김똘일등
+
+@Override
+public int compareTo(Score o) {
+ 	if(this.getSum() > o.getSum()) {
+ 		return -1;
+ 	} else if(this.getSum() == o.getSum()) {
+ 		return 0;
+ 	}
+ 	return 1;
+}
+위와같이 compareTo()의 반환 값의 양수 음수를 스위칭하면 결과도 반대로 바뀐다.
+꼴찌는 ? = 75점, 김똘일등
+일등은 ? = 60점, 김똘삼등
+
+동기화된 컬렉션 만들기
+- 앞에 언급됐던 컬렉션 중 Vector와 HashTable은 동기화된 메소드로 구성되어 멀티스레드환경에서 안전하지만, 
+  ArrayList, HashSet, HashMap은 synchronized 메소드로 구성되지 않아 멀티 스레드 환경에서 안전하지 않다.
+- 컬렉션을 Thread-safe 로 만드려면, Collections.synchronizedXxx() 메소드를 이용하면 된다.
+
+병렬처리 컬렉션 만들기 (동기화 컬렉션의 한계)
+- 동기화된 (synchronized) 컬렉션은 스레드 환경에서 안전은 보장하지만, 스레드가 하나의 요소를 처리할 때 잠금이 발생하기 때문에 
+  대기시간이 발생하고 그래서 빠른 속도를 보장하진 못한다.
+- 이러한 문제를 해결하기 위해 자바에서는 멀티 스레드가 컬렉션의 요소를 병렬적으로 처리할 수 있도록 특별한 컬렉션을 제공한다. 
+  ConcurrentHashMap과 ConcurrentLinkedQueue이다.
+- 위 컬렉션은 부분(segment) 잠금을 이용하여, 처리하는 요소가 포함된 부분만 잠금하고 나머지 부분은 다른 스레드가 변경할 수 있도록 한다.
+Map<K, V> map = new ConcurrentHashMap<K, V>();
+Queue<E> queue = new ConcurrentLinkedQueue<E>();
+- ConcurrentLinkedQueue는 락-프리 알고리즘을 구현하여, 여러개의 스레드가 동시에 접근해도 잠금을 사용하지 않고 
+  최소한 하나의 스레드가 안전하게 요소를 저장하거나 얻도록 해준다.
+
+
+
+스트림
+01. 스트림이란?
+- 자바 8부터 추가된 컬렉션(배열 포함)의 저장 요소를 하나씩 참조
+- 람다식(함수적-스타일(functional-style))으로 처리할 수 있도록 해주는 반복자
+02. 반복자 스트림
+03. 스트림의 특징
+- Iterator와 비슷한 역할 하는 반복자
+- 람다식으로 요소 처리 코드 제공
+- 대부분의 요소처리 메소드는 함수적 인터페이스 매개 타입
+- 내부 반복자 사용하므로 병렬처리 쉬움
+- 컬렉션 내부에서 요소들 반복 시킴
+- 개발자는 요소당 처리해할 코드만 제공
+- 내부 반복자와 외부 반복자의 비교
+- 스트림은 중간 처리와 최종 처리가 가능
+2. 스트림의 종류
+01. 스트림의 종류
+- 자바 8부터 새로 추가
+- java.util.stream 패키지에 스트림(stream)API존재
+- BaseStrem
+- 모든 스트림에서 사용가능한 공통 메소드(직접 사용X)
+- Stream - 객체 요소 처리
+- IntStream, LongStream, DoubleStream은 각각 기본 타입인 int, long, double 요소 처리
+- 스트림 인터페이스의 구현 객체(p.790~792)
+- 주로 컬렉션과 배열에서 얻음
+- 소스로부터 스트림 구현 객체 얻는 경우
+
+02. 파일로부터 스트림 얻기
+- Files의 정적 메소드인 lines()와 BufferedReader의 lines()메소드 이용
+- 문자 파일 내용을 스트림 통해 행 단위로 읽고 콘솔에 출력
+- 예제 793p
+03. 디렉토리로부터 스트림 얻기
+- Files의 정적 메소드인 list() 이용
+- 디렉토리 내용(서브 디렉토리 또는 파일 목록)을 스트림 통해 읽고 콘솔에 출력
+3. 스트림 파이프 라인
+01. 리덕션(Reduction)
+- 대량의 데이터를 가공해 축소하는 것
+- 데이터의 합계, 평균값, 카운팅, 최대값, 최소값
+- 컬렉션의 요소를 리덕션의 결과물로 바로 집계할 수 없을 경우에는?
+- 집계하기 좋도록 필터링, 매핑, 정렬, 그룹핑 등의 중간 처리 필요
+-> 스트림 파이프 라인의 필요성
+02. 파이프라인
+- 여러 개의 스트림이 연결되어 있는 구조
+- 파이프라인에서 최종 처리를 제외하고는 모두 중간 처리 스트림
+
+03. 중간 처리와 최종 처리
+- Stream 인터페이스는 필터링, 매핑, 정렬 등의 많은 중간 처리 메소드 가짐
+- 메소드들은 중간 처리된 스트림 리턴
+- 스트림에서 다시 중간 처리 메소드 호출해 파이프라인 형성
+- EX) 회원들 중 남자 회원들의 나이 평균 구하기(p.795 ~ 797)
+
+04. 중간 처리 메소드와 최종 처리 메소드
+- 스트림이 제공하는 중간 처리용 메소드 - 리턴 타입이 스트림
+- 스트림이 제공하는 최종 처리용 메소드
+- 리턴 타입이 기본 타입이거나 OptionalXXX
+
+4. 필터링
+01. 필터링 이란?
+- 중간 처리 기능으로 요소 걸러내는 역할
+- 필터링 메소드인 distinct()와 filter() 메소드
+- 모두 스트림이 가지고 있는 공통 메소드
+
+- distinct() 메소드 - 중복을 제거하는 기능
+- Stream의 경우 Object.equals(Object)가 true
+- 동일한 객체로 판단해 중복 제거
+- IntStream, LongStream, DoubleStream은 동일값일 경우 중복 제거
+
+- filter()메소드
+- 매개값으로 주어진 Predicate가 true를 리턴하는 요소만 필터링
+
+5. 매핑
+01. 매핑(mapping)
+- 중간 처리 기능으로 스트림의 요소를 다른 요소로 대체하는 작업
+- flatMapXXX()메소드
+- 요소를 대체하는 복수 개의 요소들로 구성된 새로운 스트림 리턴
+- flatMapXXX() 메소드의 종류
+- mapXXX() 메소드
+- 요소를 대체하는 요소로 구성된 새로운 스트림 리턴
+02. asDoubleStream(), asLongStream, boxed()메소드
+6. 정렬
+01. 정렬
+- 스트림은 요소가 최종 처리되기 전에 중간 단계에서 요소를 정렬
+- 최종 처리 순서 변경 가능
+- 요소를 정렬하는 메소드
+
+7. 루핑
+01. 루핑(looping)
+- 요소 전체를 반복하는 것
+- peek()
+- 중간 처리 메소드
+- 중간 처리 단계에서 전체 요소를 루핑하며 추가 작업하기 위해 사용
+- 최종처리 메소드가 실행되지 않으면 지연
+- 반드시 최종 처리 메소드가 호출되어야 동작
+- forEach()
+- 최종 처리 메소드
+- 파이프라인 마지막에 루핑하여 요소를 하나씩 처리
+- 요소를 소비하는 최종 처리 메소드
+- sum()과 같은 다른 최종 메소드 호출 불가
+8. 매칭
+01. 매칭이란?
+- 최종 처리 단계에서 요소들이 특정 조건에 만족하는지 조사하는 것
+- allMatch() 메소드
+- 모든 요소들이 매개값으로 주어진 Predicate의 조건을 만족하는지 조사
+- anyMatch()메소드
+- 최소한 한 개의 요소가 매개값으로 주어진 Predicate조건을 만족하는지 조사
+- noneMatch() 메소드
+- 모든 요소들이 매개값으로 주어진 Predicate의 조건을 만족하지 않는지 조사
+9. 기본 집계
+01. 집계(Aggregate)
+- 최종 처리 기능으로 요소들을 처리해 카운팅, 합계, 평균값, 최대값, 최소값 등과 같이 하나의 값으로 출하는 것
+- 집계는 대량의 데이터를 가공해서 축소하는 리덕션(Reduction)
+- 스트림이 제공하는 기본 집계
+
+02. Optional 클래스
+- Optional, OptionalDouble, OptionalInt, OptionalLong 클래스
+- 저장하는 값의 타입만 다를 뿐 제공하는 기능은 거의 동일
+- 단순히 집계 값만 저장하는 것이 아님
+- 집계 값이 존재하지 않을 경우 디폴트 값을 설정 가능
+- 집계 값을 처리하는 Consumer도 등록 가능
+- Optional 클래스들이 제공하는 메소드들
+10. 커스텀 집계
+- sum(), average(), count(), max(), min() 이용
+- 기본 집계 메소드 이용
+- reduce() 메소드
+- 프로그램화해서 다양한 집계 결과물 만들 수 있도록 제공
+
+11. 수집
+01. 수집 기능
+- 요소들을 필터링 또는 매핑 한 후 요소들을 수집하는 최종 처리 메소드인 collect()
+- 필요한 요소만 컬렉션으로 담을 수 있음
+- 요소들을 그룹핑한 후 집계(리덕션)
+02. 필터링한 요소 수집
+- Stream의 collect(Collector<T,A,R>collector)메소드
+- 필터링 또는 매핑된 요소들을 새로운 컬렉션에 수집하고, 이 컬렉션 리턴
+03. 매개값인 Collector(수집기 p. 819~822)
+- 어떤 요소들 어떤 컬렉션에 수집할 것인지 결정
+- Collector의 타입 파라미터 T는 요소
+- A는 누적기(accumulator)
+- R은 요소가 저장될 컬렉션
+- 해석하면 T요소를 A 누적기가 R에 저장한다는 의미
+- Collectors 클래스의 정적 메소드
+
+04. 사용자 정의 컨테이너에 수집하기(p. 823 ~ 826)
+- 스트림은 요소들을 필터링, 또는 매핑해 사용자 정으 ㅣ컨테이너 객체에 수집할 수 있도록
+- 이를 위한 추가적인 collector() 메소드
+
+05. 요소를 그룹핑해서 수집(p.826 ~ 830)
+- collect()를 호출시 Collectors의 groupingBy() 또는 groupingByConcurrent()가 리턴하는 Collector를 매개값 대입
+- 컬렉션의 요소들을 그룹핑해서 Map 객체 생성
+
+06. 그룹핑 후 매핑 및 집계(p.831 ~ 834)
+- Collectors.groupingBy()메소드
+- 그룹핑 후, 매핑이나 집계(평균, 카운팅, 연결, 최대, 최소, 합계)를 할 수 있도록 두 번째 매개값으로 Collector를 가질 수 있는 특성
+
+12. 병렬 처리
+01. 병렬 처리(Parallel Operation)
+- 멀티코어 CPU 환경에 쓰임
+- 하나의 작업을 분할해서 각각의 코어가 병렬적 처리하는 것
+- 병렬 처리의 목적은 작업 처리 시간을 줄이기 위한 것
+- 자바 8부터 요소를 병렬 처리할 수 있도록 하기 위해 병렬 스트림 제공
+02. 동시성(Concurrency)과 병렬성(Parallerlism)
+- 동시성 - 멀티 작업을 위해 멀티 스레드가 번갈아 가며 실행하는 성질
+- 싱클 코어 CPU를 이용한 멀티 작업
+- 병렬적으로 실행되는 것처럼 보임
+- 실체는 번갈아 가며 실행하는 동시성 작업
+- 병렬성 - 멀티 작업 위해 멀티 코어 이용해서 동시에 실행하는 성질
+03. 동시성과 병렬성의 비교
+04. 병렬성의 종류
+- 데이터 병렬성
+- 전체 데이터를 쪼개어 서브 데이터들로 만든 뒤 병렬 처리해 작업을 빨리 끝내는 것
+- 자바8에서 지원하는 병렬 스트림은 데이터 병렬성을 구현한 것
+- 멀티 코어의 수많은 대용량 요소를 서브 요소들로 나누고
+- 각각의 서브 요소들을 분리된 스레드에서 병렬처리
+- ex) 쿼드 코어(Quad Core) Cpu일 경우 4개의 서브 요소들로 나누고, 4개의 스레드가 각각의 요소들을 병렬처리
+- 작업 병렬성
+- 작업 병렬성은 서로 다른 작업을 병렬 처리하는 것
+- EX) 웹 서버(Web Server)
+- 각각의 브라우저에서 요청한 내용을 개별 스레드에서 병렬로 처리
+05. 포크 조인 프레임워크
+- 런타임 시 포크조인 프레임워크 동작
+- 포크 단계에서는 전체 데이터를 서브 데이터로 분리
+- 서브 데이터를 멀티 코어에서 병렬로 처리
+- 조인 단계에서는 서브 결과를 결합해서 최종 결과 도출
+06. 포크 조인 프레임워크의 원리
+- ForkJoinPool 사용해 작업 스레드 관리
+
+07 병렬 스트림 생성
+- 코드에서 포크조인 프레임워크 사용해도 병렬처리 가능
+- 병렬 스트림 이용할 경우 백그안우에서 포크조인 프레임워크 동작
+- 매우 쉽게 구현해 사용 가능
+- 병렬 스트림을 얻는 메소드
+- parallelStream() 메소드
+- 컬렉션으로부터 병렬 스트림을 바로 리턴
+- parallel() 메소드
+- 순차 처리 스트림 병렬 처리 스트림으로 변환해서 리턴
+
+08. 병렬 처리가 정삭적으로 이루어질 때 CPU의 상태
+- 쿼드 코어 CPU
+
+09. 병렬처리 성능
+- 병렬 처리에 영향을 미치는 3가지 요인
+- 요소의 수와 요소당 처리 시간
+- 요소 수가 적고 요소당 처리 시간 짧으면 순차 처리가 빠름
+- 스트림 소스의 종류
+- ArrayList, 배열은 인덱스로 요소 관리 -> 병렬처리가 빠름
+- 코어(Core)의 수 - 싱글 코어의 경우 순차 처리가 빠름
+
+입출력
+IO 기반 입출력 및 네트워킹
+IO 패키지 소개
+- 프로그램에서는 데이터(data)를 외부에서 읽고 다시 외부로 출력하는 작업이 빈번히 일어난다. 
+  데이터(data)는 사용자로부터 키보드를 통해 입력(in)될 수도 있고, 파일 또는 네트워크로부터 입력(in)될 수도 있다. 
+  데이터(data)는 반대로 모니터로 출력(out)될 수도 있고, 파일로 출력(out)되어 저장될 수도 있으며 네트워크로 출력(out)되어 전송될 수도 있다.
+- 자바에서 데이터는 스트림(stream)을 통해 입출력되므로 스트림의 특징을 잘 이해해야 한다. 스트림은 단일 방향으로(입력이면 입력, 출력이면 출력)
+  연속적으로 흘러가는 것을 말한다. 물이 높은 곳에서 낮은 곳으로 흐르듯이 데이터(data)는 출발지에서 나와 도착지로(입력이면 입력, 출력이면 출력) 들어간다는 개념이다.
+
+입력 스트림과 출력 스트림
+- 프로그램이 출발지냐 또는 도착지냐에 따라서 스트림의 종류가 결정된다.
+- 프로그램이 데이터(data)를 입력받을 때에는 입력스트림(inputStream)이라 부른다. 입력 스트림의 출발지는 키보드, 파일, 네트워크상의 프로그램이 될 수 있다.
+- 또, 프로그램이 데이터(data)를 보낼 때에는 출력스트림(outputStream) 이라고 부른다. 출력 스트림의 도착지는 모니터,파일, 네트워크상의 프로그램이 될 수 있다
+ -항상 프로그램을 기준으로 데이터(data)가 들어오면 입력 스트림이고, 데이터(data)가 나가면 출력 스트림이라는 것을 명심해야 한다.
+=> 프로그램이 네트워크상의 다른 프로그램과 데이터 교환을 하기 위해서는 양쪽 모두 입력 스트림과 출력스트림이 따로 필요하다. 
+   스트림의 특성이 단방향이므로 하나의 스트림으로 입력과 출력을 모두 할 수 없기 때문이다.
+구분		      바이트 기반 스트림	 	                문자 기반 스트림	 
+ 	          	입력 스트림	     출력 스트림	    	  입력 스트림	출력 스트림
+최상위 클래스	InputStream     	OutputStream		    Reader		   Writer
+하위 클래스	 XXXInputStream    XXXOutputStream	   XXXReader	  XXXWriter
+(예)	      	(FileInputStream)	(FileOutputStream)	(FileReader)	(FileWriter)
+
+=> 스트림 클래스는 크게 바이트(byte) 기반 스트림이고,문자(character) 기반 스트림 이렇게 2가지로 분류된다. 
+   바이트 기반 스트림은 그림,멀티미디어, 문자 등 모든 종류의 데이터를 받고 보낼 수 있으나, 문자 기반 스트림은 오로지 문자만 받고 보낼 수 있도록 특화되어 있다.
+=> InputStream은 바이트 기반 입력 스트림의 최상위 클래스이고, OutputStream은 바이트 기반 출력 스트림의 최상위 클래스이다.
+   이 클래스들을 각각 상속받는 하위 클래스는 접미사로 InputStream 또는 OutputStream이 붙는다.
+=> Reader는 문자 기반 입력 스트림의 최상위 클래스이고, Writer는 문자 기반 출력 스트림의 최상위 클래스이다. 
+   이 클래스들을 각각 상속받는 하위 클래스는 접미사로 Reader 또는 Writer가 붙는다.
+=> 예를 들어, 파일을 바이트 단위로 읽어들일 때에는 FileInputStream을 사용하고, 바이트 단위로 저장할 때에는 FileOuputStream을 사용한다. 
+   텍스트 파일의 경우, 문자 단위로 읽어들일 때에는 FileReader를 사용하고, 문자 단위로 저장할 때에는 FileWriter을 사용한다.
+
+InputStream
+- InputStream은 바이트 기반 입력 스트림의 최상위 클래스로 추상클래스이고, 모든 바이트 기반 입력 스트림은 이 클래스를 상속받아서 만들어진다.
+  FileInputStream, BufferedInputStream, DataInputStream 클래스는 모두 InputStream 클래스를 상속하고 있다.
+
+리턴타입	메소드		                          설명
+int	      read()		                         입력 스트림으로부터 1바이트를 읽고 읽은 바이트를 리턴한다.
+int		    read(byte[] b)	                   입력 스트림으로부터 읽은 바이트들을 매개값으로 주어진 바이트 배열 b 에 저장하고 실제로 읽은 바이트 수를 리턴한다.
+int 	    read(byte[] b, int off, int len) 	 입력 스트림으로부터 len개의 바이트만큼 읽고 매개값으로 주어진 바이트 배열 b[off]부터 len개까지 저장한다.
+                                             (만약 off가 1이라면 byte[0]에는 아무것도 저장이 되지 않는다. 그리고 실제로 읽은 바이트 수인 len개를 리턴한다. 
+                                             만약 len개를 모두 읽지 못하면 실제로 읽은 바이트 수를 리턴한다 .
+void	    close()	                           사용한 시스템 자원을 반납하고 입력 스트림을 닫는다.
+read()
+public class ReadExample {
+    public static void main(String[] args) throws IOException {
+            InputStream is = new FileInputStream("/home/kimdo/hello.txt");
+            int readByte;
+            int i=0;
+            while((readByte = is.read()) != -1){
+                System.out.printf("%c", readByte);
+            }
+    }
+}
+//실행내용
+//hello, my friends~
+=> read() 메소드는 파일을 1 바이트씩 읽고 4바이트 int타입으로 리턴한다. 
+    따라서 리턴된 4바이트 중 끝의 1바이트에만 데이터가 들어있다. 리턴한 값은 읽은 데이터의 크기이다. 
+    예를 들어 문자를 읽었으면 문자의 아스키코드값이 리턴된다(즉 위와 같이 서식문자 %c이면 문자 출력).
+=> 더 이상 입력 스트림으로부터 바이트를 읽을 수 없다면 read() 메소드는 -1을 리턴하는데
+  이를 이용하면 읽을 수 있는 마지막 바이트까지 루프를 돌며 한 바이트씩 읽을 수 있다.
+InputStream is = new FileInputStream("/home/kimdo/hello.txt");
+int readByte;
+while((readByte = is.read()) != -1){
+}
+read(byte[] b)
+public class ReadExample2 {
+    public static void main(String[] args) throws IOException {
+        InputStream is = new FileInputStream("/home/kimdo/car_data.csv");
+        int readByteNo;
+        byte[] readBytes = new byte[1000];
+        while((readByteNo=is.read(readBytes))!=-1){
+            for(int i=0; i<readByteNo; i++)
+                System.out.printf("%c",readBytes[i]);
+            System.out.println();
+        }
+    }
+}
+// readByteNo는 읽은 바이트의 수를 나타낸다. 문자를 입력받을 때 한 문자당 1바이트를 나타내므로 readByteNo가 1000이면, 1000개의 문자
+// 즉 1000개의 바이트를 읽어낸 것이다. 또 read(byte[] b)는 매개값으로 준 배열의 길이보다 적은 바이트를 읽었으면 읽은 만큼만 리턴한다. 
+// 예를 들어 매개값의 배열의 길이가 5이지만 읽은 바이트가 3이면 3을 출력한다. 
+    그리고 매개값의 buf에 데이터가 입력되므로 데이터를 사용하는 것은 매개값의 buf로 데이터를 받고 이용하면 된다.
+// 또, read(byte[] b) 역시 입력 스트림으로부터 더이상 읽을 데이터가 없다면 -1을 출력한다. 
+InputStream is = new FileInputStream("/home/kimdo/car_data.csv");
+int readByteNo;
+byte[] readBytes = new byte[1000];
+while((readByteNo = is.read(readBytes)) != -1){
+}
+read(byte[] b, int off, int len)
+- read(byte[] b, int off, int len) 메소드는 입력 스트림으로부터 len개의 바이트만큼 읽고, 매개값으로 주어진 바이트 배열 b[off]부터 len개까지 저장한다. 
+  그리고 읽은 바이트 수인 len개를 리턴한다. 실제로 읽은 바이트 수가 len개보다 작을 경우 읽은 수 만큼 리턴한다. 
+  또 read(byte[] b, int off, int len) 역시 더이상 읽을 바이트가 없다면 -1을 리턴한다.
+InputStream is = ...;
+byte[] readBytes = new byte[100];
+int readByteNo = is.read(readBytes, 0 ,100);
+public class ReadExample3 {
+    public static void main(String[] args) throws IOException {
+        InputStream is = new FileInputStream("/home/kimdo/hello.txt");
+        int readByteNo;
+        byte[] readBytes = new byte[10];
+        while((readByteNo = is.read(readBytes,0,5))!=-1){
+            for(int i=0; i<readByteNo; i++) {
+                System.out.printf("%c",readBytes[i]);
+            }
+            System.out.println();
+        }
+    }
+}
+close() 메소드
+- InputStream을 더 이상 사용하지 않을 경우에는 close() 메소드를 호출해서 InputStream에서 사용했던 시스템 자원을 풀어준다
+is.close();
+OutputStream
+- OutputStream은 바이트 기반 출력 스트림의 최상위 클래스로 추상 클래스이고, 모든 바이트 기반 출력 스트림은 이 클래스를 상속 받아서 만들어진다.
+  FileOutputStream, BufferedOutputStream, DataOutputStream 클래스는 모두 OutputStream 클래스를 상속하고 있다.
+
+리턴타입	메소드				                          설명
+void	  	write(int b)			                    출력 스트림으로 1바이트를 보낸다.(b의 끝 1바이트)
+void	  	write(byte[] b)		                   	출력 스트림으로 주어진 바이트 배열 b의 모든 바이트를 보낸다
+void		  write(byte[] b, int off, int len)	    출력 스트림으로 주어진 바이트 배열 b[off] 부터 len개까지의 바이트를 보낸다.
+void	  	flush()			                        	버퍼에 잔류하는 모든 바이트를 출력한다.
+void	  	close()				                        사용한 시스템 자원을 반납하고 출력 스트림을 닫는다.
+
+write(int b)
+- write(int b) 메소드는 매개 변수로 주어진 int 값에서 끝에 있는 1바이트만 출력 스트림으로 보낸다. 
+  매개 변수가 int 타입이므로 4바이트 모두 를 보내는 것으로 오해할 수 있다.
+public class WriteExample1 {
+    public static void main(String[] args) throws IOException {
+        OutputStream os = new FileOutputStream("/home/kimdo/test.txt");
+        byte[] data = "ABC".getBytes();
+        for (byte datum : data)
+            os.write(datum);
+            //write은 새로 써진다. 원래 있던 내용은 다 사라진다. 
+    }
+}
+//test.txt의 내용 
+// ABC
+write(byte[] b)
+write(byte[] b)는 매개값으로 주어진 바이트 배열의 모든 바이트를 출력 스트림으로 보낸다.
+public class WriteExample2 {
+    public static void main(String[] args) throws IOException {
+        OutputStream os = new FileOutputStream("/home/kimdo/test.txt");
+        byte[] data = "ABCD".getBytes();
+        os.write(data);
+    }
+}
+//test.txt의 내용
+// ABCD
+write(byte[] b ,int off, int len)
+- write(byte[] b, int off, int len)은 b[off]부터 len개의 바이트를 출력 스트림으로 보낸다.
+public class WriteExample3 {
+    public static void main(String[] args) throws IOException {
+        OutputStream os = new FileOutputStream("/home/kimdo/test.txt");
+        byte[] data = "ABC".getBytes();
+        os.write(data,1,2);
+        // index(off)가  1이므로 BC만 보내진다.
+    }
+}
+//test.txt의 내용
+// BC
+flush()와 close()
+- 출력 스트림은 내부에 작은 버퍼(buffer)가 있어서 데이터가 출력되기 전에 버퍼에 쌓여있다가 순서대로(FIFO) 출력된다.
+- flush() 메소드는 버퍼에 잔류하고 있는 데이터를 모두 출력시키고 버퍼를 비우는 역할을 한다.
+- 프로그램에서 더 이상 출력할 데이터가 없다면 flush() 메소드를 마지막으로 호출하여 버퍼에 잔류하는 모든 데이터가 출력되도록 해야 한다.(깔끔히 청소!) 
+  OutputStream을 더 이상 사용하지 않을 경우에는 close() 메소드를 호출하여 OutputStream에서 사용했던 시스템 자원을 풀어준다.
+OutputStream os = new FileOutputStream("/home/kimdo/test.txt");
+byte[] data = "ABC".getBytes();
+os.write(data);
+os.flush(); // flush()가 언제 효과적인지 알아보자.
+os.close();
+리눅스 c에서의 버퍼링 정책
+
+//   1. 풀 버퍼링 - 버퍼가 가득차면, 비운다.
+//     => 일반 파일
+//   2. 라인 버퍼링 - 엔터('\n')가 나오거나, 버퍼가 가득차면 비운다.
+//     => stdout, stdin
+//   3. 노 버퍼링  - 버퍼링을 하지 않는다.
+//     => stderr
+
+//   버퍼를 비우는 표준 라이브러리 함수
+//    : fflush, fclose
+//    -> 프로세스가 종료하면, 프로세스가 연 파일을 스스로 정리한다.
+=> 따라서 풀 버퍼링의 경우엔 버퍼가 가득 차기 전에는 내용이 파일로 보내지지 않고 가득차야 보내진다. 
+   또 printf와 같은 stdout(표준 출력 스트림)의 함수도 개행을 만나기 전이나 버퍼가 가득 차기 전에는 내용이 출력되지 않는다. 
+   프로그램이 안전하게 종료되야지만 버퍼가 가득차지 않아도 파일로 데이터가 보내지는 것이다.
+   (라인 버퍼링의 경우 개행을 만나지 않거나 버퍼가 차지 않아도 프로그램이 안전하게 종료되면 그때 모니터에 출력 된다. 
+   => 프로그램이 종료되지 않아도 출력이 되는데 이건 뭐지?? 물어봐야겠다. fflush()를 자체적으로 제공해주나??) 
+   따라서 이러한 경우 프로그램이 비정상적으로 종료될때 아직 데이터가 버퍼에 남아있게 되고 결국 모니터나 파일로 출력이 되지않는다. 
+   따라서 이러한 경우를 방지하기 위해 비정상 종료시에 fflush() 함수를 이용해 버퍼에 남아있는 데이터들을 파일로 전송해야 한다.(이것도 맞는지 물어보자)
+
+Reader
+- Reader는 문자 기반 입력 스트림의 최상위 클래스로 추상 클래스이다. 모든 문자 기반 입력 스트림은 이 클래스를 상속받아서 만들어진다. 
+  FileReader, BufferedReader, InputStreamReader 클래스는 모두 Reader 클래스를 상속하고 있다.
+메소드	 				                            설명
+int	read()				                        입력 스트림으로부터 한 개의 문자를 읽고 리턴한다.
+int	read(char[] cbuf)		                	입력 스트림으로부터 읽은 문자들을 매개값으로 주어진 문자 배열 cbuf에 저장하고 실제로 읽은 문자 수를 리턴한다.
+int	read(char[] cbuf, int off, int len)	  입력 스트림으로부터 len개의 문자를 읽고 매개값으로 주어진 문자 배열 cbuf[off]부터 len개까지 저장한다. 
+                                          (즉 off =1 이라면 cbuf[0]엔 아무것도 저장되지 않는다.) 그리고 실제로 읽은 문자 수인 len개를 리턴한다.
+void	close()				                      사용한 시스템 자원을 반납하고 입력 스트림을 닫는다.
+read()
+
+=> read() 메소드는 입력 스트림으로부터 한 개의 문자(2바이트)를 읽고 4바이트 int 타입으로 리턴한다. 
+   따라서 리턴된 4바이트 중 끝에 있는 2바이트에 문자가 들어있다. 
+   예를 들어 입력 스트림에서 2개의 문자(총 4바이트)가 들어온다면 다음과 같이 read()메소드로 한 문자씩 두 번 읽을 수 있다.
+
+char charData = (char)read(); //리턴 타입이 int 이므로 char타입으로 형변환하자.
+//charData는 한 문자 씩 읽는다. read()자체가 한 문자씩 리턴하므로.
+public class ReadEx1 {
+    public static void main(String[] args) throws IOException {
+        Reader reader = new FileReader("/home/kimdo/hello.txt");
+        int readData;
+        while((readData=reader.read())!=-1){
+            char charData = (char)readData;
+            System.out.print(charData);
+        }
+        System.out.println();
+    }
+}
+read(char[] cbuf) ```java public class ReadEx1 {
+public static void main(String[] args) throws IOException {
+    Reader reader = new FileReader("/home/kimdo/hello.txt");
+    int readDataNo;
+    char[] buf = new char[3];
+    while((readDataNo=reader.read(buf))!=-1){
+       for(int i=0; i<readDataNo; i++)
+           System.out.print(buf[i]);
+        System.out.print(" ");
+    }
+} } ``` > read(char[] cbuf, int off, int len) ```java public class ReadEx1 {
+
+public static void main(String[] args) throws IOException {
+    Reader reader = new FileReader("/home/kimdo/hello.txt");
+    int readDataNo;
+    char[] buf = new char[3];
+
+    while((readDataNo=reader.read(buf,0,3))!=-1){
+       for(int i=0; i<readDataNo; i++)
+           System.out.print(buf[i]);
+        System.out.print(" ");
+    }
+} } ``` > close() ```java reader.close(); ```
+Writer
+- Writer는 문자 기반 출력 스트림의 최상위 클래스로 추상 클래스이다. 모든 문자 기반 출력 스트림 클래스는 이 클래스를 상속받아서 만들어진다.
+  FileWriter, BufferedWriter, PrintWriter, OutputStreamWriter 클래스는 모두 Writer 클래스를 상속하고 있다.
+메소드	 				설명
+void	write(int c)			출력 스트림으로 한 개의 문자를 보낸다.(c의 끝 2바이트)
+void	write(char[] cbuf)			출력 스트림으로 주어진 문자 배열 cbuf의 모든 문자를 보낸다.
+void	write(char[] cbuf, int off, int len)	출력 스트림으로 주어진 문자 배열 cbuf[off]부터 len개까지의 문자를 보낸다.
+void	write(String str)			출력 스트림으로 주어진 문자열을 모두 보낸다.
+void	write(String str, int off, int len)	출력 스트림으로 주어진 문자열 off순번부터 len개까지의 문자를 보낸다.
+void	flush()				버퍼에 잔류하는 모든 문자열을 출력한다.
+void	clear()				사용한 시스템 자원을 반납하고 출력 스트림을 닫는다.
+
+- write(int c) 메소드는 매개 변수로 주어진 int값에서 끝에 있는 2바이트(한 개의 문자)만 출력 스트림으로 보낸다. 
+  매개변수가 int 타입이므로 4바이트 모두를 보내는 것으로 오해할 수 있는데 오해하지말자!
+public class WriteEx1 {
+    public static void main(String[] args) throws IOException {
+        Writer writer = new FileWriter("/home/kimdo/hello.txt");
+        char[] data = "김도형".toCharArray();
+        for (char datum : data) {
+            writer.write(datum);
+        }
+        writer.flush();
+        //flush() 를 다 써야 하는 구나.
+    }
+}
+write( char[] cbuf)
+
+public class WriteEx1 {
+    public static void main(String[] args) throws IOException {
+        Writer writer = new FileWriter("/home/kimdo/hello.txt");
+        char[] data = "김선무".toCharArray();
+        writer.write(data);
+        writer.flush();
+        //flush() 를 다 써야 하는 구나.
+        writer.close();
+    }
+}
+write( char[] cbuf, int off, int len)
+
+public class WriteEx1 {
+    public static void main(String[] args) throws IOException {
+        Writer writer = new FileWriter("/home/kimdo/hello.txt");
+        char[] data = "김선무".toCharArray();
+        writer.write(data,1,2); // 선무만 보내진다.
+        writer.flush();
+        //flush() 를 다 써야 하는 구나.
+        writer.close();
+    }
+}
+write( String str) 과 write(String str, int off, int len)
+매개변수(String str)
+public class WriteEx1 {
+    public static void main(String[] args) throws IOException {
+        Writer writer = new FileWriter("/home/kimdo/hello.txt");
+        String data = "고병관";
+        writer.write(data);
+        writer.flush();
+        //flush() 를 다 써야 하는 구나.
+        writer.close();
+    }
+}
+매개변수(String str, int off, int len)
+public class WriteEx1 {
+    public static void main(String[] args) throws IOException {
+        Writer writer = new FileWriter("/home/kimdo/hello.txt");
+        String data = "고병관";
+        writer.write(data,1,2);//병관
+        writer.flush();
+        //flush() 를 다 써야 하는 구나.
+        writer.close();
+    }
+}
+flush(), close()
+- flush()메소드는 버퍼에 잔류하고 있는 데이터를 모두 출력시키고 버퍼를 비우는 역할을 한다. 
+  프로그램에서 더 이상 출력할 문자가 없다면 flush() 메소드를 마지막으로 호출하여 모든 문자가 출력되도록 해야 한다.
+- 마지막으로 Writer를 더 이상 사용하지 않을 경우에는 close()메소드를 호출해서 Writer에서 사용했던 시스템 자원을 풀어준다.
